@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Kubernetes Pod CrashLoopBackOff and OOMKilled Runbook</title>
+</head>
+<body>
+  <article>
+    <h1>Kubernetes Pod CrashLoopBackOff and OOMKilled Runbook</h1>
+    <p>When Kubernetes pods repeatedly restart with CrashLoopBackOff or exit code 137 OOMKilled, inspect pod events, container termination reasons, and memory resource limits.</p>
+
+    <h2>Diagnosing OOMKilled Exit Code 137</h2>
+    <p>Exit code 137 indicates the Linux kernel cgroup OOM killer terminated the container because working-set memory exceeded spec.containers[].resources.limits.memory.</p>
+    <pre><code>kubectl describe pod -n &lt;namespace&gt; &lt;pod-name&gt;
+kubectl top pods -n &lt;namespace&gt; --containers
+kubectl get events -n &lt;namespace&gt; --sort-by=.lastTimestamp</code></pre>
+
+    <h2>Readiness and Liveness Probe Tuning</h2>
+    <p>Slow-starting JVM or Python ML workers often fail initial liveness probes; configure startupProbe or raise initialDelaySeconds before escalating node sizing.</p>
+  </article>
+</body>
+</html>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Istio Ingress 502 Bad Gateway Troubleshooting</title>
+</head>
+<body>
+  <article>
+    <h1>Istio Ingress 502 Bad Gateway Troubleshooting</h1>
+    <p>A 502 Bad Gateway error through the Istio Ingress Gateway occurs when Envoy cannot complete a TCP connection or mutual TLS handshake with the upstream Kubernetes pod.</p>
+
+    <h2>Root Cause 1: mTLS Strict Mode Mismatch</h2>
+    <p>When a namespace enforces PeerAuthentication with mode STRICT, every calling workload or gateway must present a valid SPIFFE mTLS certificate via a matching DestinationRule configured with ISTIO_MUTUAL TLS mode.</p>
+    <pre><code>kubectl get peerauthentication -n &lt;namespace&gt; -o yaml
+kubectl get destinationrule -n &lt;namespace&gt; -o yaml</code></pre>
+
+    <h2>Root Cause 2: Readiness Probe and Connection Refused</h2>
+    <p>If Envoy reports upstream reset before response headers or delayed connect error 111 connection refused, verify that the pod container is passing readiness probes and listening on the exact Service targetPort.</p>
+    <pre><code>kubectl logs -n &lt;namespace&gt; -l app=&lt;service-name&gt; -c istio-proxy --tail=100
+kubectl get endpoints -n &lt;namespace&gt; &lt;service-name&gt;</code></pre>
+
+    <h2>Standard Remediation Template</h2>
+    <p>Apply a DestinationRule in the target namespace with trafficPolicy tls mode set to ISTIO_MUTUAL when the service repository owns the Helm chart.</p>
+  </article>
+</body>
+</html>

@@ -1,0 +1,36 @@
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Python virtual environments & caches
+backend/.venv/
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+coverage/
+*.sqlite3
+*.db
+
+# Node / Frontend dependencies & build outputs
+node_modules/
+frontend/node_modules/
+dist/
+frontend/dist/
+
+# Test & Playwright artifacts
+test-results/
+playwright-report/
+blob-report/
+
+# Logs & OS files
+*.log
+.DS_Store
+
+# Agent state metadata
+.agents/

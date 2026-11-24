@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>GitLab CI Runner Docker-in-Docker and Cache Troubleshooting</title>
+</head>
+<body>
+  <article>
+    <h1>GitLab CI Runner Docker-in-Docker and Cache Troubleshooting</h1>
+    <p>Shared GitLab CI/CD runners execute build jobs inside ephemeral Kubernetes pods using Docker-in-Docker (dind) sidecars or rootless BuildKit executors.</p>
+
+    <h2>Resolving DinD Daemon Connection Timeouts</h2>
+    <p>If jobs fail with Cannot connect to the Docker daemon at tcp://docker:2375 or TLS handshake timeout, ensure DOCKER_TLS_CERTDIR matches the runner service configuration.</p>
+    <pre><code>kubectl get pods -n gitlab-runner -l app=gitlab-runner
+kubectl logs -n gitlab-runner -l app=gitlab-runner --tail=100</code></pre>
+
+    <h2>Runner Tag Selection and Cache Eviction</h2>
+    <p>High-memory builds must target the runner-large tag and avoid storing unbounded node_modules artifacts inside distributed S3 cache keys.</p>
+  </article>
+</body>
+</html>

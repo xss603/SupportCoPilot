@@ -1,0 +1,99 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: gitlab_support_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_DB: app_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d app_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: gitlab_support_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: gitlab_support_backend
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgrespassword@postgres:5432/app_db
+      - REDIS_URL=redis://redis:6379/0
+      - GITLAB_URL=${GITLAB_URL:-https://gitlab.com}
+      - GITLAB_DEFAULT_PROJECT_ID=${GITLAB_DEFAULT_PROJECT_ID:-}
+      - GITLAB_PRIVATE_TOKEN=${GITLAB_PRIVATE_TOKEN:-glpat-your-token}
+      - GITLAB_WEBHOOK_SECRET=${GITLAB_WEBHOOK_SECRET:-your-webhook-secret}
+      - GITLAB_BOT_USERNAME=${GITLAB_BOT_USERNAME:-platform-bot}
+      - LLM_API_KEY=${LLM_API_KEY:-your-llm-api-key}
+      - LLM_BASE_URL=${LLM_BASE_URL:-https://generativelanguage.googleapis.com/v1beta/openai/}
+      - LLM_MODEL=${LLM_MODEL:-gemini-2.5-flash}
+      - AUTO_PILOT_CONFIDENCE_THRESHOLD=${AUTO_PILOT_CONFIDENCE_THRESHOLD:-0.85}
+      - ENABLE_AUTO_EXECUTION=${ENABLE_AUTO_EXECUTION:-false}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./runbooks:/app/runbooks:ro
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: gitlab_support_worker
+    restart: always
+    command: ["arq", "app.tasks.worker.WorkerSettings"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgrespassword@postgres:5432/app_db
+      - REDIS_URL=redis://redis:6379/0
+      - GITLAB_URL=${GITLAB_URL:-https://gitlab.com}
+      - GITLAB_DEFAULT_PROJECT_ID=${GITLAB_DEFAULT_PROJECT_ID:-}
+      - GITLAB_PRIVATE_TOKEN=${GITLAB_PRIVATE_TOKEN:-glpat-your-token}
+      - LLM_API_KEY=${LLM_API_KEY:-your-llm-api-key}
+      - LLM_BASE_URL=${LLM_BASE_URL:-https://generativelanguage.googleapis.com/v1beta/openai/}
+      - LLM_MODEL=${LLM_MODEL:-gemini-2.5-flash}
+    volumes:
+      - ./runbooks:/app/runbooks:ro
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: gitlab_support_frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+
+volumes:
+  postgres_data:

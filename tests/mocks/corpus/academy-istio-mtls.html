@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Academy: Istio Mutual TLS Deep Dive</title>
+</head>
+<body>
+  <article>
+    <h1>Academy: Istio Mutual TLS Deep Dive</h1>
+    <p>This Platform Academy lab explains how Envoy sidecars negotiate SPIFFE identities, PeerAuthentication policies, and DestinationRule traffic policies across namespaces.</p>
+
+    <h2>Verifying Envoy mTLS Handshakes</h2>
+    <p>Use istioctl authn tls-check or inspect Envoy proxy clusters via read-only kubectl exec diagnostics to verify whether STRICT mTLS is active between source and destination pods.</p>
+    <pre><code>kubectl get peerauthentication --all-namespaces
+kubectl get destinationrule --all-namespaces</code></pre>
+  </article>
+</body>
+</html>

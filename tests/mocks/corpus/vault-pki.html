@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>HashiCorp Vault PKI TLS Certificate Lifecycle</title>
+</head>
+<body>
+  <article>
+    <h1>HashiCorp Vault PKI TLS Certificate Lifecycle</h1>
+    <p>Internal x509 TLS certificates for platform services are issued and rotated automatically through the corporate HashiCorp Vault PKI secrets engine and Kubernetes Vault Agent Injector.</p>
+
+    <h2>Diagnosing Expired TLS Certificates</h2>
+    <p>Inspect the mounted certificate enddate inside the workload container and review the vault-agent-init sidecar logs to confirm whether the Vault Kubernetes auth token lease expired.</p>
+    <pre><code>openssl x509 -in /etc/ssl/certs/tls.crt -noout -enddate
+kubectl logs -n &lt;namespace&gt; &lt;pod-name&gt; -c vault-agent-init --tail=100</code></pre>
+
+    <h2>Custom Domain SAN Authorization</h2>
+    <p>If a service requires a new custom domain Subject Alternative Name or wildcard certificate, submit an automated platform escalation ticket to authorize the Vault PKI role template.</p>
+  </article>
+</body>
+</html>

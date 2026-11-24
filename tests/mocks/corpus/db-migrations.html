@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>PostgreSQL Database User and Schema Migration Policy</title>
+</head>
+<body>
+  <article>
+    <h1>PostgreSQL Database User and Schema Migration Policy</h1>
+    <p>Microservices onboarding to PostgreSQL must follow strict environment separation between automated staging CI/CD migrations and change-controlled production DDL operations.</p>
+
+    <h2>Staging vs Production Schema Alterations</h2>
+    <p>Staging databases allow automated schema migrations via GitLab CI/CD runners using the dedicated pipeline service account, whereas direct production DDL or table drops require a formal /demandes platform change ticket.</p>
+    <pre><code>kubectl get jobs -n &lt;namespace&gt; -l component=db-migration
+alembic current --verbose</code></pre>
+
+    <h2>Escalation Criteria for Elevated Grants</h2>
+    <p>Requests for new PostgreSQL roles, GRANT ALL privileges, or production schema overrides must escalate to the Data Engineering project with the target database name, environment, and requested grants.</p>
+  </article>
+</body>
+</html>
